@@ -1,0 +1,148 @@
+@model IEnumerable<Karigar.Models.ServiceProvider>
+@{
+    ViewData["Title"] = "Manage Service Providers";
+}
+
+<div class="container-fluid my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="gradient-text"><i class="fas fa-user-tie me-2"></i>Manage Service Providers</h1>
+        <div class="d-flex gap-2">
+            <a asp-action="ServiceProviders" class="btn btn-outline-primary @(ViewBag.PendingOnly != true ? "active" : "")">
+                <i class="fas fa-list me-1"></i>All Providers
+            </a>
+            <a asp-action="ServiceProviders" asp-route-pendingOnly="true" class="btn btn-outline-warning @(ViewBag.PendingOnly == true ? "active" : "")">
+                <i class="fas fa-clock me-1"></i>Pending Approval
+            </a>
+        </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" value="@ViewBag.Search" placeholder="Search by business name or email...">
+                        @if (ViewBag.PendingOnly == true)
+                        {
+                            <input type="hidden" name="pendingOnly" value="true">
+                        }
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var provider in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 hover-card">
+                        <div class="card-header text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">@provider.BusinessName</h6>
+                                <small class="opacity-75">@provider.User?.Email</small>
+                            </div>
+                            <div>
+                                @if (provider.IsApproved)
+                                {
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i></span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning"><i class="fas fa-clock"></i></span>
+                                }
+                                @if (provider.IsSuspended)
+                                {
+                                    <span class="badge bg-danger"><i class="fas fa-ban"></i></span>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">
+                                <i class="fas fa-map-marker-alt me-1"></i>@provider.City, @provider.State
+                            </p>
+                            @if (!string.IsNullOrEmpty(provider.Description))
+                            {
+                                <p class="small mb-3">@(provider.Description.Length > 100 ? provider.Description.Substring(0, 100) + "..." : provider.Description)</p>
+                            }
+                            
+                            @if (provider.Services != null && provider.Services.Any())
+                            {
+                                <div class="mb-3">
+                                    <strong class="small">Services (@provider.Services.Count):</strong>
+                                    <div class="mt-2">
+                                        @foreach (var service in provider.Services.Take(3))
+                                        {
+                                            <span class="badge bg-secondary me-1 mb-1">@service.Name</span>
+                                        }
+                                        @if (provider.Services.Count > 3)
+                                        {
+                                            <span class="badge bg-light text-dark">+@(provider.Services.Count - 3) more</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning small mb-3">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>No services added yet
+                                </div>
+                            }
+                            
+                            <div class="d-flex gap-2 flex-wrap">
+                                @if (!provider.IsApproved)
+                                {
+                                    <form asp-action="ApproveServiceProvider" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@provider.Id" />
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </button>
+                                    </form>
+                                }
+                                @if (!provider.IsSuspended)
+                                {
+                                    <form asp-action="SuspendServiceProvider" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@provider.Id" />
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Suspend this provider?')">
+                                            <i class="fas fa-ban me-1"></i>Suspend
+                                        </button>
+                                    </form>
+                                }
+                                <form asp-action="RemoveServiceProvider" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@provider.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this provider? This cannot be undone!')">
+                                        <i class="fas fa-trash me-1"></i>Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Created: @provider.CreatedAt.ToString("MMM dd, yyyy")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No service providers found</h5>
+                <p class="text-muted">Try adjusting your search criteria or check back later.</p>
+            </div>
+        </div>
+    }
+</div>

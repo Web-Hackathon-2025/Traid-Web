@@ -1,0 +1,124 @@
+@model IEnumerable<Karigar.Models.ServiceProviderViewModel>
+@{
+    ViewData["Title"] = "Find Service Providers";
+}
+
+<div class="container my-4">
+    <h2 class="mb-4"><i class="fas fa-search me-2"></i>Find Service Providers</h2>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" value="@ViewBag.Search" placeholder="Search by name or service...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category</label>
+                    <select name="categoryId" class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.Id" selected="@(ViewBag.CategoryId == category.Id)">@category.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">City</label>
+                    <input type="text" name="city" class="form-control" value="@ViewBag.City" placeholder="Enter city...">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var provider in Model)
+            {
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@provider.BusinessName</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-map-marker-alt me-1"></i>@provider.City, @provider.State
+                                    </p>
+                                </div>
+                                @if (provider.AverageRating.HasValue)
+                                {
+                                    <div class="text-end">
+                                        <div>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="fas fa-star @(i <= provider.AverageRating ? "text-warning" : "text-muted")" style="font-size: 0.8rem;"></i>
+                                            }
+                                        </div>
+                                        <small class="text-muted">@provider.AverageRating.Value.ToString("F1") (@provider.TotalReviews)</small>
+                                    </div>
+                                }
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(provider.Description))
+                            {
+                                <p class="card-text small">@(provider.Description.Length > 150 ? provider.Description.Substring(0, 150) + "..." : provider.Description)</p>
+                            }
+                            
+                            @if (provider.Services.Any())
+                            {
+                                <div class="mb-3">
+                                    <strong class="small">Services:</strong>
+                                    <div class="mt-2">
+                                        @foreach (var service in provider.Services.Take(3))
+                                        {
+                                            <span class="badge bg-secondary me-1 mb-1">@service.Name - ₹@service.Price @service.PriceUnit</span>
+                                        }
+                                        @if (provider.Services.Count > 3)
+                                        {
+                                            <span class="badge bg-light text-dark">+@(provider.Services.Count - 3) more</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="Details" asp-route-id="@provider.Id" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                                @if (!string.IsNullOrEmpty(provider.PhoneNumber))
+                                {
+                                    <a href="tel:@provider.PhoneNumber" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-phone me-1"></i>Call
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i>No service providers found. Try adjusting your search criteria.
+        </div>
+    }
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+</style>
+

@@ -1,0 +1,106 @@
+@model Karigar.Models.Review
+@{
+    ViewData["Title"] = "Write Review";
+    var serviceRequest = ViewBag.ServiceRequest as Karigar.Models.ServiceRequest;
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Write Review</h4>
+                </div>
+                <div class="card-body">
+                    @if (serviceRequest != null)
+                    {
+                        <div class="alert alert-info mb-4">
+                            <h5>@serviceRequest.Service?.Name</h5>
+                            <p class="mb-0"><strong>Provider:</strong> @serviceRequest.ServiceProvider?.BusinessName</p>
+                        </div>
+                    }
+                    
+                    <form asp-action="Create" method="post">
+                        <input type="hidden" asp-for="ServiceRequestId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Rating *</label>
+                            <div class="rating-input">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" asp-for="Rating" value="@i" id="rating@i" class="d-none" />
+                                    <label for="rating@i" class="star-label">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                }
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Comment" class="form-label">Comment</label>
+                            <textarea asp-for="Comment" class="form-control" rows="5" placeholder="Share your experience..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Bookings" asp-action="Details" asp-route-id="@Model.ServiceRequestId" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Submit Review
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.querySelectorAll('.star-label').forEach((label, index) => {
+            label.addEventListener('click', function() {
+                const rating = 5 - index;
+                document.getElementById('rating' + rating).checked = true;
+                updateStars(rating);
+            });
+        });
+        
+        function updateStars(rating) {
+            document.querySelectorAll('.star-label').forEach((label, index) => {
+                const starRating = 5 - index;
+                if (starRating <= rating) {
+                    label.querySelector('i').classList.add('text-warning');
+                    label.querySelector('i').classList.remove('text-muted');
+                } else {
+                    label.querySelector('i').classList.remove('text-warning');
+                    label.querySelector('i').classList.add('text-muted');
+                }
+            });
+        }
+    </script>
+    <style>
+        .rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        .star-label {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #ccc;
+            margin: 0 2px;
+        }
+        .star-label:hover,
+        .star-label:hover ~ .star-label {
+            color: #ffc107;
+        }
+        .star-label input:checked ~ .star-label,
+        input:checked ~ .star-label {
+            color: #ffc107;
+        }
+    </style>
+}
+
