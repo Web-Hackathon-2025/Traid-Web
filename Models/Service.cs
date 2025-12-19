@@ -8,10 +8,19 @@ namespace Karigar.Models
         public int Id { get; set; }
 
         [Required]
-        public int ServiceProviderId { get; set; }
+        [StringLength(200)]
+        public string Name { get; set; } = string.Empty;
 
-        [ForeignKey("ServiceProviderId")]
-        public ServiceProvider? ServiceProvider { get; set; }
+        [StringLength(1000)]
+        public string? Description { get; set; }
+
+        [Required]
+        public decimal Price { get; set; }
+
+        [StringLength(50)]
+        public string? PriceUnit { get; set; } = "per service";
+
+        public bool IsAvailable { get; set; } = true;
 
         [Required]
         public int CategoryId { get; set; }
@@ -20,28 +29,11 @@ namespace Karigar.Models
         public Category? Category { get; set; }
 
         [Required]
-        [StringLength(200)]
-        public string Name { get; set; } = string.Empty;
+        public int ServiceProviderId { get; set; }
 
-        [StringLength(1000)]
-        public string? Description { get; set; }
-
-        [Required]
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal Price { get; set; }
-
-        [StringLength(50)]
-        public string? PriceUnit { get; set; } // e.g., "per hour", "per service", "per visit"
-
-        public bool IsAvailable { get; set; } = true;
-
-        public int? EstimatedDurationMinutes { get; set; }
+        [ForeignKey("ServiceProviderId")]
+        public ServiceProviderModel? ServiceProvider { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? UpdatedAt { get; set; }
-
-        public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();
     }
 }
-

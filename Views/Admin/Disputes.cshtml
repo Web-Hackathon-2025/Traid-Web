@@ -1,0 +1,98 @@
+@model IEnumerable<Karigar.Models.Dispute>
+@using Karigar.Models
+@{
+    ViewData["Title"] = "Handle Disputes";
+}
+
+<div class="container-fluid my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="gradient-text"><i class="fas fa-gavel me-2"></i>Handle Disputes</h1>
+        <div>
+            <a asp-action="Disputes" class="btn btn-outline-primary @(ViewBag.Status == null ? "active" : "")">All</a>
+            <a asp-action="Disputes" asp-route-status="Pending" class="btn btn-outline-warning @(ViewBag.Status == "Pending" ? "active" : "")">Pending</a>
+            <a asp-action="Disputes" asp-route-status="UnderReview" class="btn btn-outline-info @(ViewBag.Status == "UnderReview" ? "active" : "")">Under Review</a>
+            <a asp-action="Disputes" asp-route-status="Resolved" class="btn btn-outline-success @(ViewBag.Status == "Resolved" ? "active" : "")">Resolved</a>
+        </div>
+    </div>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var dispute in Model)
+            {
+                <div class="col-12">
+                    <div class="card shadow-sm @(dispute.Status == DisputeStatus.Pending ? "border-warning" : "")">
+                        <div class="card-header @(dispute.Status == DisputeStatus.Pending ? "bg-warning text-dark" : "bg-primary text-white")">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Dispute #@dispute.Id</h5>
+                                <span class="badge @(dispute.Status == DisputeStatus.Pending ? "bg-danger" : dispute.Status == DisputeStatus.Resolved ? "bg-success" : "bg-info")">
+                                    @dispute.Status
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Service Request:</strong> @dispute.ServiceRequest?.Service?.Name
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Provider:</strong> @dispute.ServiceRequest?.ServiceProvider?.BusinessName
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Reason:</strong> @dispute.Reason
+                            </div>
+                            @if (!string.IsNullOrEmpty(dispute.Description))
+                            {
+                                <div class="mb-3">
+                                    <strong>Description:</strong>
+                                    <p class="mb-0">@dispute.Description</p>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(dispute.AdminNotes))
+                            {
+                                <div class="mb-3">
+                                    <strong>Admin Notes:</strong>
+                                    <p class="mb-0">@dispute.AdminNotes</p>
+                                </div>
+                            }
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Reported On:</strong> @dispute.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                                </div>
+                                @if (dispute.ResolvedAt.HasValue)
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Resolved On:</strong> @dispute.ResolvedAt.Value.ToString("MMM dd, yyyy hh:mm tt")
+                                    </div>
+                                }
+                            </div>
+                            @if (dispute.Status == DisputeStatus.Pending || dispute.Status == DisputeStatus.UnderReview)
+                            {
+                                <div class="d-flex gap-2">
+                                    <a asp-action="ResolveDispute" asp-route-id="@dispute.Id" class="btn btn-primary">
+                                        <i class="fas fa-eye me-1"></i>Review & Resolve
+                                    </a>
+                                    <a asp-action="Details" asp-controller="Bookings" asp-route-id="@dispute.ServiceRequestId" class="btn btn-info">
+                                        <i class="fas fa-info-circle me-1"></i>View Booking
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h5 class="text-muted">No disputes found</h5>
+                <p class="text-muted">All disputes have been resolved or there are no pending disputes.</p>
+            </div>
+        </div>
+    }
+</div>
+

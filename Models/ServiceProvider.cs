@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 namespace Karigar.Models
 {
-    public class ServiceProvider
+    public class ServiceProviderModel
     {
         public int Id { get; set; }
 
@@ -12,7 +11,7 @@ namespace Karigar.Models
         public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public IdentityUser? User { get; set; }
+        public ApplicationUser? User { get; set; }
 
         [Required]
         [StringLength(200)]
@@ -30,14 +29,14 @@ namespace Karigar.Models
         public string City { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(50)]
+        [StringLength(100)]
         public string State { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(10)]
+        [StringLength(20)]
         public string ZipCode { get; set; } = string.Empty;
 
-        [StringLength(15)]
+        [StringLength(20)]
         public string? PhoneNumber { get; set; }
 
         [StringLength(500)]
@@ -48,15 +47,5 @@ namespace Karigar.Models
         public bool IsSuspended { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? UpdatedAt { get; set; }
-
-        public double? Latitude { get; set; }
-
-        public double? Longitude { get; set; }
-
-        public ICollection<Service> Services { get; set; } = new List<Service>();
-        public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();
     }
 }
-

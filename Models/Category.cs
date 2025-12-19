@@ -13,10 +13,7 @@ namespace Karigar.Models
         [StringLength(500)]
         public string? Description { get; set; }
 
-        [StringLength(50)]
+        [StringLength(10)]
         public string? Icon { get; set; }
-
-        public ICollection<Service> Services { get; set; } = new List<Service>();
     }
 }
-
